@@ -65,4 +65,4 @@ void integrate_osc_eqs(double p0, double e0);
 void integrate_osc_eqs_implicit(double p0, double e0);
 
 // Function for integrating the NIT EoM
-void interpolate_Fs_and_integrate_NIT_EoM(double p0, double e0);
+void interpolate_Fs_and_integrate_NIT_EoM(int mode, double p0, double e0);
