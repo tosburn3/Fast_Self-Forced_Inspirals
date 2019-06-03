@@ -241,7 +241,7 @@ void interpolate_Fs_and_integrate_NIT_EoM(int mode, double p0, double e0){
 		Xv1s.push_back(Xv1);
 		Yp1s.push_back(Yp1);
 		Ye1s.push_back(Ye1);
-	}	
+	}
 	
 	// Interpolate the data
 	Interpolant Fp1_interp(ys, es, Fp1s);
