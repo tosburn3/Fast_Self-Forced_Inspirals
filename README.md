@@ -22,12 +22,12 @@ Type `scons` in the  main directory to compile.
 
 Running `./NIT_inspiral` without any arguments will give a list of the possible arguments. The various options and how to use the code are given below.
 
-Before computing a NIT inspiral you must first compute the the averaged forcing functions. This is performed in two steps:
+One feature of this code is to demonstrate how the NIT averaged forcing functions are calculated from a self-force interpolation model. This is performed in two steps:
 
 1. ./NIT_inspiral -d (to decompose the self-force into Fourier modes)
 2. ./NIT_inspiral -c (to compute the averaged forcing functions from the Fourier coefficients)
 
-A NIT inspiral can now be computed with 
+A NIT inspiral based on these user-generated NIT coefficients can now be computed with
 
 ```
 ./NIT_inspiral -n p0 e0 q
@@ -44,6 +44,12 @@ A Full self-forced inspiral can be computed with
 
 This inspiral will take seconds to hours to compute depending on the value of q.
 
+The compact self-force model built into this package has a restricted range in orbital parameter space (e <= 0.2, p-2e <= 11) to streamline its implementation. In recongnition of this, a default set of pre-computed NIT coefficients are included with a wider range of orbital parameters (e <= 0.8, p-2e <= 26, although eccentricities above e = 0.7 should be considered experimental). A NIT inspiral based on these default NIT coefficients can now be computed with
+
+```
+./NIT_inspiral -n0 p0 e0 q
+```
+
 To compute a waveform one must first compute the inspiral using the commands above. The parameters for the waveform (sampling rate etc) are specified in the
 configuration file found in config/parameters.cfg. To compute the waveform associated with a NIT inspiral use
 
@@ -51,7 +57,7 @@ configuration file found in config/parameters.cfg. To compute the waveform assoc
 ./NIT -w p0 e0 q -n
 ```
 
-Similarly to compute the waveform associated with a full self-forced inspiral use:
+(there is no destinction between the user-generated and pre-computed NIT inspiral coefficients at this later stage). Similarly to compute the waveform associated with a full self-forced inspiral use:
 
 ```
 ./NIT -w p0 e0 q -f

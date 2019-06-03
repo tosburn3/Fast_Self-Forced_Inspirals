@@ -214,8 +214,8 @@ void interpolate_Fs_and_integrate_NIT_EoM(int mode, double p0, double e0){
 	
 	char Ftildes_file[32];
 	
-	if(mode == NIT_INSPIRAL_DEFAULT) sprintf(Ftildes_file,"data/Ftildes.dat");
-	else sprintf(Ftildes_file,"data/Ftildes_0.dat");
+	if(mode == NIT_INSPIRAL_DEFAULT) sprintf(Ftildes_file,"data/Ftildes_0.dat");
+	else sprintf(Ftildes_file,"data/Ftildes.dat");
 	
 	ifstream Ftilde_file(Ftildes_file);
 	
