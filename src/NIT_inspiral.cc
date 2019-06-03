@@ -450,6 +450,7 @@ void FFT_self_force(double p, double e, fftw_plan *plan, int N, fftw_complex *in
 		Fphi[i] = lib_Sch_GSF_Fphi_diss(e, p, v[i]) + lib_Sch_GSF_Fphi_cons(e, p, v[i]);
 		
 		in[i][0] = dw_dchi(p, e, v[i], Fphi[i], Fr[i]);
+		in[i][1] = 0.0;
 	}
 
     fftw_execute(*plan); /* repeat as needed */
