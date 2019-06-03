@@ -47,12 +47,13 @@ extern "C" {
 }
 
 // Used to set the mode the code runs in
-#define FULL_INSPIRAL  0
-#define NIT_INSPIRAL   1
-#define DECOMPOSE      2
-#define CONSTRUCT_Fs   3
-#define WAVEFORM_FULL  4
-#define WAVEFORM_NIT   5
+#define FULL_INSPIRAL  			0
+#define NIT_INSPIRAL_DEFAULT	1
+#define NIT_INSPIRAL   			2
+#define DECOMPOSE      			3
+#define CONSTRUCT_Fs   			4
+#define WAVEFORM_FULL  			5
+#define WAVEFORM_NIT   			6
 
 // Functions for computing the RHS of the NIT EoM
 void FFT_self_force_over_parameter_space();

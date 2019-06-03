@@ -34,6 +34,9 @@ int main(int argc, char* argv[]){
 		if( !strcmp(argv[1], "-f") ){
 			mode = FULL_INSPIRAL;
 			cout << "# Mode: inspiral using full EoM" << endl;
+		} else if( !strcmp(argv[1], "-n0") ){
+			mode = NIT_INSPIRAL_DEFAULT;
+			cout << "# Mode: inspiral using default NIT EoM" << endl;
 		} else if( !strcmp(argv[1], "-n") ){
 			mode = NIT_INSPIRAL;
 			cout << "# Mode: inspiral using NIT EoM" << endl;
@@ -65,7 +68,7 @@ int main(int argc, char* argv[]){
 		}else{
 			cout << "Unrecognized flag. Run with no arguments for instructions." << endl;
 		}
-		if(mode == FULL_INSPIRAL || mode == NIT_INSPIRAL){
+		if(mode == FULL_INSPIRAL || mode == NIT_INSPIRAL || mode == NIT_INSPIRAL_DEFAULT){
 			if(argc == 5){
 				p0 = atof(argv[2]);
 				e0 = atof(argv[3]);	
@@ -79,6 +82,7 @@ int main(int argc, char* argv[]){
 		cout << "Necessary parameters:" << endl;
 		cout << "\t1. flag      '-f', '-n', 'w', '-d' or '-c' " << endl;
 		cout << "\t   '-f'      Full inspiral" << endl;
+		cout << "\t   '-n0'     Default NIT inspiral" << endl;
 		cout << "\t   '-n'      NIT inspiral" << endl;
 		cout << "\t   '-w'      Compute the waveform" << endl;
 		cout << "\t   '-d'      Decompose the self-force data into Fourier modes" << endl;
@@ -130,6 +134,16 @@ int main(int argc, char* argv[]){
 		fout << "# Full Inspiral" << endl;
 		integrate_osc_eqs(p0, e0);	
 			
+	}else if(mode == NIT_INSPIRAL_DEFAULT){
+		
+		ostringstream filename;
+		filename << "output/Inspiral_NIT_p" << p0 << "_e" << e0 << "_q" << q <<".dat";
+		cout << "Outputting inspiral trajectory to " << filename.str() << endl;
+	
+		fout.open(filename.str());
+		fout << "# Default NIT Inspiral" << endl;
+		interpolate_Fs_and_integrate_NIT_EoM(mode, p0, e0);
+			
 	}else if(mode == NIT_INSPIRAL){
 		
 		ostringstream filename;
@@ -138,7 +152,7 @@ int main(int argc, char* argv[]){
 	
 		fout.open(filename.str());
 		fout << "# NIT Inspiral" << endl;
-		interpolate_Fs_and_integrate_NIT_EoM(p0, e0);
+		interpolate_Fs_and_integrate_NIT_EoM(mode, p0, e0);
 		
 	}else if(mode == WAVEFORM_NIT){
 		
@@ -196,8 +210,14 @@ int NIT_EoM (double v, const double y[], double f[], void *params){
 	else return GSL_SUCCESS + 1;
 }
 
-void interpolate_Fs_and_integrate_NIT_EoM(double p0, double e0){
-	ifstream Ftilde_file("data/Ftildes.dat");
+void interpolate_Fs_and_integrate_NIT_EoM(int mode, double p0, double e0){
+	
+	char Ftildes_file[32];
+	
+	if(mode == NIT_INSPIRAL_DEFAULT) sprintf(Ftildes_file,"data/Ftildes.dat");
+	else sprintf(Ftildes_file,"data/Ftildes_0.dat");
+	
+	ifstream Ftilde_file(Ftildes_file);
 	
 	// Load the data for the F/f/U/V on the RHS of the NIT EoM
 	string Ftilde_string;
