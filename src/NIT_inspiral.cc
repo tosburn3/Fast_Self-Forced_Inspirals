@@ -858,6 +858,7 @@ void compute_waveform(string insp_filename, string out_filename){
 	string insp_string;
 	vector<double> chis, ps, es, vs, ts, phis;
 	double chi, p, e, v, t, phi;
+	int test = 0;
 	while(getline(insp, insp_string)){
 				
 		if(insp_string.at(0) == '#') continue;
@@ -865,6 +866,9 @@ void compute_waveform(string insp_filename, string out_filename){
 		stringstream insp_ss(insp_string);
 		
 		insp_ss >> chi >> p >> e >> v >> t >> phi;
+		
+		if(test == 0) test = 1;
+		else if(chi <= chis.back()) break;
 				
 		chis.push_back(chi);
 		ps.push_back(p);
