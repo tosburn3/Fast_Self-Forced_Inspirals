@@ -44,7 +44,9 @@ A Full self-forced inspiral can be computed with
 
 This inspiral will take seconds to hours to compute depending on the value of q.
 
-The compact self-force model built into this package has a restricted range in orbital parameter space (e <= 0.2, p-2e <= 11) to streamline its implementation. In recongnition of this, a default set of pre-computed NIT coefficients are included with a wider range of orbital parameters (e <= 0.8, p-2e <= 26, although eccentricities above e = 0.7 should be considered experimental). A NIT inspiral based on these default NIT coefficients can be computed with
+The compact self-force model built into this package has a restricted range in orbital parameter space (e <= 0.2, p-2e <= 11) to streamline its implementation. 
+In recongnition of this, a default set of pre-computed NIT coefficients are included with a wider range of orbital parameters 
+(e <= 0.8, p-2e <= 26, although eccentricities above e = 0.7 should be considered experimental). A NIT inspiral based on these default NIT coefficients can be computed with
 
 ```
 ./NIT_inspiral -n0 p0 e0 q
