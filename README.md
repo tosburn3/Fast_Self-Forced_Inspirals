@@ -59,7 +59,9 @@ configuration file found in config/parameters.cfg. To compute the waveform assoc
 ./NIT -w p0 e0 q -n
 ```
 
-(there is no destinction between the user-generated and pre-computed NIT inspiral coefficients at this later stage). Similarly to compute the waveform associated with a full self-forced inspiral use:
+(there is no destinction between the user-generated and pre-computed NIT inspiral coefficients at this later stage). 
+
+Similarly to compute the waveform associated with a full self-forced inspiral use:
 
 ```
 ./NIT -w p0 e0 q -f
