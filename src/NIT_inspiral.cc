@@ -942,7 +942,6 @@ void compute_waveform(string insp_filename, string out_filename){
 	// Resample t more densely
 	// FIXME only resample up to t_max
     high_resolution_clock::time_point t1 = high_resolution_clock::now();
-	
 	double t_max = i_max*Deltat;
 	vector<double> t_dense, chi_dense;
 	chi = 0;
@@ -951,7 +950,7 @@ void compute_waveform(string insp_filename, string out_filename){
 		p = p_interp.eval(chi);
 		e = e_interp.eval(chi);
 		v = v_interp.eval(chi);
-	
+			
 		chi_dense.push_back(chi);
 		if(mode == WAVEFORM_NIT) t = t_interp.eval(chi) - U0(p,e,v);
 		else t = t_interp.eval(chi);
@@ -974,6 +973,8 @@ void compute_waveform(string insp_filename, string out_filename){
 	
 	Complex h;
 	vector<double> hplus, hcross;
+	int i_max_test = floor(t_dense.back()/Deltat)-1;
+	if(i_max > i_max_test) i_max = i_max_test;
 	for(int i = 0; i <= i_max; i ++){
 		t 		= i*Deltat;
 		chi 	= chi_interp.eval(t);
@@ -990,14 +991,13 @@ void compute_waveform(string insp_filename, string out_filename){
 		}else{
 			v = chi - v_interp.eval(chi);
 		}
-				
+		
 		h = waveform_h(p, e, v, phi, 0., 0.);
 		
 		
 		hplus.push_back(h.real());
 		hcross.push_back(h.imag());
 	}
-	
 	t2 = high_resolution_clock::now();
 
 	time_span = duration_cast<duration<double>>(t2 - t1);
