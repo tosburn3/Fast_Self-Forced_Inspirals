@@ -17,6 +17,23 @@
 #include <NIT_inspiral.h>
 #include <libconfig.h++>
 
+#define CHI_MAX 1000000.0
+
+// precision of output
+#define OUT_PREC 12
+
+// numerical tolerance for ODE integrations
+#define NUM_TOL 1.0e-11
+
+// smallest value for p-2*e-6
+#define Y_MIN 0.1
+
+// number of Fourier coefficients in FFT
+#define FOURIER_CALC_NUM 50
+
+// number of Fourier coefficients to print, must be less than half of FOURIER_CALC_NUM
+#define FOURIER_PRINT_NUM 10
+
 using namespace libconfig;
 
 void compute_waveform(string insp_filename, string out_filename);
@@ -117,9 +134,9 @@ int main(int argc, char* argv[]){
 	// Disable the GSL error handler (only for production version of code)
 	// gsl_set_error_handler_off();
 	
-	// Output all the data at 10 digits of precision using scientific notation
-	fout.precision(10);
-	cout.precision(10);
+	// Output all the data at OUT_PREC ~12 digits of precision using scientific notation
+	fout.precision(OUT_PREC);
+	cout.precision(OUT_PREC);
 	fout << scientific;
 	cout << scientific;
 	
@@ -206,7 +223,7 @@ int NIT_EoM (double v, const double y[], double f[], void *params){
 	f[3] = T_r(p, e)/(2.0*M_PI) + q*interps->U1->eval(p-2*e, e);
 	f[4] = Phi(p, e)/(2.0*M_PI) + q*interps->V1->eval(p-2*e, e);
 	
-	if(p-6-2*e > 0.1) return GSL_SUCCESS;
+	if(p-6-2*e > Y_MIN) return GSL_SUCCESS;
 	else return GSL_SUCCESS + 1;
 }
 
@@ -294,7 +311,7 @@ void interpolate_Fs_and_integrate_NIT_EoM(int mode, double p0, double e0){
 		double delta_chi = 2.0*M_PI/n_per_orbit;
 	
 	    gsl_odeiv2_system sys 	= {NIT_EoM, NULL, 5, &interps};	
-	    gsl_odeiv2_driver *d 	= gsl_odeiv2_driver_alloc_y_new (&sys, gsl_odeiv2_step_rk8pd, 1e-10, 1e-10, 0.0);
+	    gsl_odeiv2_driver *d 	= gsl_odeiv2_driver_alloc_y_new (&sys, gsl_odeiv2_step_rk8pd, NUM_TOL, NUM_TOL, 0.0);
 	
 	    high_resolution_clock::time_point t1 = high_resolution_clock::now();
 	
@@ -320,12 +337,12 @@ void interpolate_Fs_and_integrate_NIT_EoM(int mode, double p0, double e0){
 	    const gsl_odeiv2_step_type * T = gsl_odeiv2_step_rk8pd;
 
 	    gsl_odeiv2_step *s 		= gsl_odeiv2_step_alloc (T, 5);
-	    gsl_odeiv2_control *c 	= gsl_odeiv2_control_y_new (1e-10, 1e-10);
+	    gsl_odeiv2_control *c 	= gsl_odeiv2_control_y_new (NUM_TOL, NUM_TOL);
 	    gsl_odeiv2_evolve *e 	= gsl_odeiv2_evolve_alloc (5);
 
 	    gsl_odeiv2_system sys = {NIT_EoM, NULL, 5, &interps};
 
-	    double chi_max = 1000000000.0;	//FIXME make this something like 100/q
+	    double chi_max = CHI_MAX;	//FIXME make this something like 100/q
 	    double h = 1e-1;
 
 	    high_resolution_clock::time_point t1 = high_resolution_clock::now();
@@ -341,7 +358,7 @@ void interpolate_Fs_and_integrate_NIT_EoM(int mode, double p0, double e0){
 			fout << chi << " " << y1[0] << " " << y1[1] << " " << y1[2] << " " << y1[3] << " " << y1[4] << " " << endl;
 			
 			// Stop output of lots of data near the separatrix when the time step gets very small
-			if(fabs(chi_prev/chi - 1.0) < 1e-9) break;
+			if(fabs(chi_prev/chi - 1.0) < 3*NUM_TOL) break;
 			
 		    chi_prev = chi;	
 	      }
@@ -364,7 +381,7 @@ void interpolate_Fs_and_integrate_NIT_EoM(int mode, double p0, double e0){
 // Functions for computing the RHS of the NIT EoM
 void FFT_self_force_over_parameter_space(){
 	double p, e;
-	int N = 50;
+	int N = FOURIER_CALC_NUM;
     fftw_complex *in, *out;
     fftw_plan plan;
 
@@ -442,7 +459,7 @@ void FFT_self_force(double p, double e, fftw_plan *plan, int N, fftw_complex *in
 	double *v = new double[N];
 	
 	// The number of Fourier modes to output
-	int N_out = 10;
+	int N_out = FOURIER_PRINT_NUM;
 	
 	// Output the coordinates in phase space, y = p-2e, e 
 	*Fp_file << p-2*e << " " << e << " ";
@@ -636,7 +653,7 @@ void construct_tilde_Fs(){
 	
 	// The output file for the Ftilde data
 	ofstream Ftilde_file("data/Ftildes.dat");
-	Ftilde_file.precision(10);
+	Ftilde_file.precision(OUT_PREC);
 	
 	string fv_string, Fp_string, Fe_string, dFpdp_string, dFpde_string, dFedp_string, dFede_string;
 	string dU0dp_string, dU0de_string, dU0dv_string, dV0dp_string, dV0de_string, dV0dv_string;
@@ -690,7 +707,7 @@ void construct_tilde_Fs(){
 		double Fp2 = 0, Fe2 = 0, U1 = 0, V1 = 0, Xv1 = 0, Yp1 = 0, Ye1 = 0;
 		Complex Fpk, Fek, fvk, dFpdpk, dFpdek, dFedpk, dFedek;
 		Complex dU0dpk, dU0dek, dU0dvk, dV0dpk, dV0dek, dV0dvk;
-		for(int k = 1; k < 10; k++){
+		for(int k = 1; k < FOURIER_PRINT_NUM; k++){
 			Fp_ss >> re >> im;
 			Fpk = re + 1i*im;
 			
@@ -769,7 +786,7 @@ int osc_eqs (double chi, const double y[], double f[], void *params){
 	f[3] = dt_dchi(p, e, v);
 	f[4] = dphi_dchi(p, e, v);	
 	
-	if(p-6-2*e > 0.1) return GSL_SUCCESS;
+	if(p-6-2*e > Y_MIN) return GSL_SUCCESS;
 	else return GSL_SUCCESS + 1;
 }
 
@@ -803,7 +820,7 @@ void integrate_osc_eqs(double p0, double e0){
 	 	}
 		
 	    gsl_odeiv2_system sys 	= {osc_eqs, NULL, 5, NULL};	
-	    gsl_odeiv2_driver *d 	= gsl_odeiv2_driver_alloc_y_new (&sys, gsl_odeiv2_step_rk8pd, 1e-10, 1e-10, 0.0);
+	    gsl_odeiv2_driver *d 	= gsl_odeiv2_driver_alloc_y_new (&sys, gsl_odeiv2_step_rk8pd, NUM_TOL, NUM_TOL, 0.0);
 		
 		double chi_i = 0;
 		double delta_chi = 2.0*M_PI/n_per_orbit;
@@ -826,12 +843,12 @@ void integrate_osc_eqs(double p0, double e0){
 	    const gsl_odeiv2_step_type * T = gsl_odeiv2_step_rk8pd;
 
 	    gsl_odeiv2_step *s 		= gsl_odeiv2_step_alloc (T, 5);
-	    gsl_odeiv2_control *c 	= gsl_odeiv2_control_y_new (1e-10, 1e-10);
+	    gsl_odeiv2_control *c 	= gsl_odeiv2_control_y_new (NUM_TOL, NUM_TOL);
 	    gsl_odeiv2_evolve *e 	= gsl_odeiv2_evolve_alloc (5);
 
 	    gsl_odeiv2_system sys = {osc_eqs, NULL, 5, NULL};
 
-	    double chi_max = 1000000000.0;	//FIXME make this something like 100/q
+	    double chi_max = CHI_MAX;	//FIXME make this something like 100/q
 	    double h = 1e-6;
 
 	    high_resolution_clock::time_point t1 = high_resolution_clock::now();
